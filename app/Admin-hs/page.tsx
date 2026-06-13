@@ -13,7 +13,7 @@ export default function AdminHubPage() {
     if (localStorage.getItem('auth_token')) {
       router.replace('/admin-hs/controllers');
     } else {
-      setChecking(false);
+      setChecking(false); 
     }
   }, [router]);
 
