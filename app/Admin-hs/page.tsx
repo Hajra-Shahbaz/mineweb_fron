@@ -11,7 +11,7 @@ export default function AdminHubPage() {
   useEffect(() => {
     // If token already exists, auto-forward past the lock screen
     if (localStorage.getItem('auth_token')) {
-      router.replace('/Admin-hs/controllers');
+      router.replace('/admin-hs/controllers');
     } else {
       setChecking(false);
     }
