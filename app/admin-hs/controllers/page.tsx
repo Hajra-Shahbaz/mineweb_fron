@@ -42,7 +42,7 @@ export default function ControllersPage() {
     const token = localStorage.getItem('auth_token');
     
     if (!token) {
-      router.replace('/Admin-hs');
+      router.replace('/admin-hs');
     } else {
       setIsCheckingAuth(false);
     }
