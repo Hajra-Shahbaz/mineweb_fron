@@ -1,38 +1,66 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowUpRight, Settings } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowUpRight, Settings, Loader2, CheckSquare } from 'lucide-react'; // Added CheckSquare icon
 import AdminNavbar from './components/navbar';
 
-// Import all of your workspace view files
-import SystemUserView from './components/user';
+// ==========================================
+// COMPONENT WORKSPACE IMPORTS
+// ==========================================
+import { SystemUserView } from './components/user'; 
 import ConfigurationView from './components/configuration';
 import ProjectView from './components/project'; 
 import ExperienceSequencer from './components/experience';
 import EducationDashboard from './components/education';
 import SkillDashboard from './components/skill';
 import { SocialManager } from './components/social';
+import { ContactInbox } from './components/contact';
+import { SystemTodoPanel } from './components/task'; // Importing the new task component
 
-
-// Map your Database "Route Target Key ID" string tokens directly to your imported React Components
+// Dynamic Lookup Dictionary Mapping IDs to Components
 const ComponentRegistry: Record<string, React.ComponentType<any>> = {
-  system: SystemUserView,
+  system: SystemUserView, 
   configuration: ConfigurationView,
   project: ProjectView,
   experience: ExperienceSequencer, 
-  education:EducationDashboard,
+  education: EducationDashboard,
   skill: SkillDashboard, 
   social: SocialManager,
-  
+  contact: ContactInbox,
+  task: SystemTodoPanel, // Added the task component to the registry
 };
 
 export default function ControllersPage() {
-  // Set the default view to 'system' (Profile Configuration)
+  const router = useRouter();
   const [activeView, setActiveView] = useState<string>('system');
+  const [isCheckingAuth, setIsCheckingAuth] = useState<boolean>(true);
 
-  // Look up the component context dynamically from our registry map
+  // Security Guard Authorization Verification Loop
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    
+    if (!token) {
+      router.replace('/Admin-hs');
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, [router]);
+
   const ActiveComponent = ComponentRegistry[activeView];
+
+  // Prevent UI flickering while checking authentication context state
+  if (isCheckingAuth) {
+    return (
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-white gap-3">
+        <Loader2 className="animate-spin text-purple-600" size={32} />
+        <p className="text-sm font-medium text-gray-500 tracking-wide animate-pulse">
+          Verifying administrative credentials...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen w-full bg-white text-gray-900 antialiased selection:bg-gray-100 font-sans">
@@ -48,19 +76,36 @@ export default function ControllersPage() {
             <span className="text-sm font-semibold tracking-tight text-gray-800">Hajra Shahbaz</span>
           </div>
 
-          <div className="flex items-center gap-4">
-            {/* Quick access utility override button to pull up the navigation system form anytime */}
+          <div className="flex items-center gap-2">
             <button 
+              type="button"
               onClick={() => setActiveView('configuration')}
+              title="Open workspace setup configuration layout drawer"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-600 hover:underline bg-purple-50 px-3 py-1.5 rounded-lg transition-colors"
             >
               <Settings size={12} />
               <span>Configure Workspace</span>
             </button>
 
+            {/* 🎯 Task Manager Quick Access Action injected right after configuration setting */}
+            <button 
+              type="button"
+              onClick={() => setActiveView('task')}
+              title="Navigate straight to system pipeline and task milestones"
+              className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all duration-200 ${
+                activeView === 'system'
+                  ? 'bg-gray-900 text-white border-gray-900 shadow-sm'
+                  : 'bg-white text-gray-600 border-gray-100 hover:border-gray-300 hover:text-gray-900'
+              }`}
+            >
+              <CheckSquare size={12} />
+              <span>Task View</span>
+            </button>
+
             <Link 
-              href="/portfolio" 
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 border border-gray-100 hover:border-gray-300 px-3 py-1.5 rounded-lg transition-all duration-200"
+              href="/" 
+              title="Navigate outward to the viewable public live presentation layer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 border border-gray-100 hover:border-gray-300 px-3 py-1.5 rounded-lg transition-all duration-200 ml-2"
             >
               <span>Live Portfolio</span>
               <ArrowUpRight size={14} className="text-gray-400" />
@@ -73,7 +118,6 @@ export default function ControllersPage() {
           {ActiveComponent ? (
             <ActiveComponent />
           ) : (
-            /* Fallback display grid frame if you added an items key via MongoDB but have not imported/registered its component file yet */
             <div className="min-h-[400px] bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center p-8 animate-fade-in">
               <p className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Dynamic Node Target Active</p>
               <p className="text-xs text-gray-400 mt-1 max-w-sm text-center">

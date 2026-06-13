@@ -1,23 +1,33 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import PasscodeLock from './controllers/components/lock'; // Adjust this import path based on where your file is saved
+import PasscodeLock from './controllers/components/lock'; 
 
 export default function AdminHubPage() {
   const router = useRouter();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    // If token already exists, auto-forward past the lock screen
+    if (localStorage.getItem('auth_token')) {
+      router.replace('/Admin-hs/controllers');
+    } else {
+      setChecking(false);
+    }
+  }, [router]);
 
   const handleSuccessRedirect = () => {
-    // Force a push to the controller page after successful authorization
     router.push('/Admin-hs/controllers');
   };
+
+  if (checking) return null; // Or a simple clean loading blank space
 
   return (
     <main className="min-h-screen w-full bg-white">
       <PasscodeLock
         onSuccessRedirectAction={handleSuccessRedirect}
-        // Replace this URL with your preferred character image
-        bgImageUrl="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop" 
+        bgImageUrl="https://my-blogfolio-web-26.s3.ap-southeast-2.amazonaws.com/0c538a0c0be1058a12c302c4914a3925-removebg-preview.png" 
         correctPin="2310"
       />
     </main>

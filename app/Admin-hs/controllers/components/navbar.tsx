@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useGetAllNavItemsQuery } from '@/store/apis/navApi';
+import { useGetAdminNavQuery, IAdminNav } from '@/store/apis/navApi';
 import * as Icons from 'lucide-react';
 
 interface AdminNavbarProps {
@@ -13,10 +13,10 @@ interface AdminNavbarProps {
 export default function AdminNavbar({ currentView, setViewAction }: AdminNavbarProps) {
   const router = useRouter();
   
-  // RTK Query fetches the base response object. We safely dig down to response.data
-  const { data: response, isLoading } = useGetAllNavItemsQuery();
+  // Fetch via the specific Admin route hook matching your Express backend split
+  const { data: response, isLoading } = useGetAdminNavQuery();
   
-  // Safely fallback to an empty array if the response array hasn't landed yet
+  // Safely fallback to an empty array if the API request hasn't completed yet
   const navItems = response?.data || [];
 
   const handleLogout = () => {
@@ -44,7 +44,8 @@ export default function AdminNavbar({ currentView, setViewAction }: AdminNavbarP
               <span>Syncing dynamic map...</span>
             </div>
           ) : (
-            navItems.map((item: any) => {
+            // Strongly typed mapping automatically updates when elements are dragged/reordered
+            navItems.map((item: IAdminNav) => {
               // Graceful safe evaluation fallback if Lucide text matches fail
               const DynamicIcon = (Icons as any)[item.iconName] || Icons.LayoutDashboard;
               const isActive = currentView === item.id;
@@ -52,6 +53,7 @@ export default function AdminNavbar({ currentView, setViewAction }: AdminNavbarP
               return (
                 <button
                   key={item.id}
+                  type="button"
                   onClick={() => setViewAction(item.id)}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
                     isActive 
@@ -63,9 +65,10 @@ export default function AdminNavbar({ currentView, setViewAction }: AdminNavbarP
                     <DynamicIcon size={18} className={isActive ? 'text-white' : 'text-gray-400'} />
                     <span>{item.label}</span>
                   </div>
-                  {!item.isVisible && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-50 text-gray-400 uppercase font-bold tracking-wider scale-95">
-                      Muted
+                  
+                  {!item.isWorking && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-100 uppercase font-bold tracking-wider scale-95">
+                      Under Dev
                     </span>
                   )}
                 </button>
@@ -77,6 +80,7 @@ export default function AdminNavbar({ currentView, setViewAction }: AdminNavbarP
 
       <div className="p-4 border-t border-gray-50">
         <button 
+          type="button"
           onClick={handleLogout} 
           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50/50 transition-all duration-200"
         >

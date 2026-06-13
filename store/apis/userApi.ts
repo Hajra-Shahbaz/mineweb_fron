@@ -9,6 +9,8 @@ export interface IProfilePicture {
 export interface IUserProfile {
   _id?: string;
   name: string;
+  email: string;          // 🌟 Added email
+  phoneNumber?: string;   // 🌟 Added optional phone number
   title: string;
   aboutText: string;
   subText?: string;
@@ -21,6 +23,8 @@ export interface IUserProfile {
 // Request payload interface for the initial text POST block
 export interface ICreateProfileInput {
   name: string;
+  email: string;          // 🌟 Added email (Required for initial setup)
+  phoneNumber?: string;   // 🌟 Added optional phone number
   title: string;
   aboutText: string;
   subText?: string;
