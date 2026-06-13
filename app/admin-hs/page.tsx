@@ -18,7 +18,7 @@ export default function AdminHubPage() {
   }, [router]);
 
   const handleSuccessRedirect = () => {
-    router.push('/Admin-hs/controllers');
+    router.push('/admin-hs/controllers');
   };
 
   if (checking) return null; // Or a simple clean loading blank space
