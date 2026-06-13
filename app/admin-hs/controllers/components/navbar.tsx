@@ -3,7 +3,46 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGetAdminNavQuery, IAdminNav } from '@/store/apis/navApi';
-import * as Icons from 'lucide-react';
+
+// Explicit individual imports tell the compiler exactly what to bundle!
+import { 
+  ShieldAlert, 
+  Menu, 
+  X, 
+  ChevronLeft, 
+  LayoutDashboard, 
+  LogOut,
+  User,        // Add any specific icons you use on your backend navigation fields here
+  FolderKanban,
+  GraduationCap,
+  Briefcase,
+  Wrench,
+  Share2,
+  Mail,
+  CheckSquare,
+  Settings,
+  Loader2
+} from 'lucide-react';
+
+// Create a local map linking strings to your actual imported icon modules
+const IconMap: Record<string, React.ComponentType<any>> = {
+  ShieldAlert,
+  Menu,
+  X,
+  ChevronLeft,
+  LayoutDashboard,
+  LogOut,
+  User,
+  FolderKanban,
+  GraduationCap,
+  Briefcase,
+  Wrench,
+  Share2,
+  Mail,
+  CheckSquare,
+  Settings,
+  Loader2
+};
 
 interface AdminNavbarProps {
   currentView: string;
@@ -13,32 +52,26 @@ interface AdminNavbarProps {
 export default function AdminNavbar({ currentView, setViewAction }: AdminNavbarProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  
-  // Fetch via the specific Admin route hook matching your Express backend split
   const { data: response, isLoading } = useGetAdminNavQuery();
-  
-  // Safely fallback to an empty array if the API request hasn't completed yet
   const navItems = response?.data || [];
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
-    router.push('/Admin-hs');
+    router.push('/admin-hs');
   };
 
   const handleNavigation = (viewId: string) => {
     setViewAction(viewId);
-    setIsOpen(false); // Clean drawer dismissal on interaction
+    setIsOpen(false);
   };
 
   return (
     <>
-      {/* ==========================================
-          MOBILE TOP UTILITY CONTROLLER LAYER
-          ========================================== */}
+      {/* MOBILE TOP UTILITY CONTROLLER LAYER */}
       <div className="md:hidden w-full bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-50 select-none">
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-lg bg-black flex items-center justify-center">
-            <Icons.ShieldAlert size={14} className="text-white" />
+            <ShieldAlert size={14} className="text-white" />
           </div>
           <div>
             <h1 className="text-xs font-bold tracking-tight text-gray-900 uppercase">Core Workspace</h1>
@@ -49,23 +82,19 @@ export default function AdminNavbar({ currentView, setViewAction }: AdminNavbarP
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-100"
-          aria-label="Toggle navigation drawer"
         >
-          {isOpen ? <Icons.X size={18} /> : <Icons.Menu size={18} />}
+          {isOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
       </div>
 
-      {/* Backdrop overlay layer for seamless dismissal visibility */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-xs z-40 md:hidden transition-opacity duration-200"
+          className="fixed inset-0 bg-black/20 backdrop-blur-xs z-40 md:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-      {/* ==========================================
-          PRIMARY SIDEBAR PRESENTATION VIEWPORT
-          ========================================== */}
+      {/* PRIMARY SIDEBAR PRESENTATION VIEWPORT */}
       <aside 
         className={`
           fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-100 flex flex-col justify-between h-screen font-sans select-none z-50 transition-transform duration-300 ease-in-out
@@ -74,11 +103,10 @@ export default function AdminNavbar({ currentView, setViewAction }: AdminNavbarP
         `}
       >
         <div>
-          {/* Header context hidden inside static structural flow on desktop viewports */}
           <div className="p-6 border-b border-gray-50 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-black flex items-center justify-center">
-                <Icons.ShieldAlert size={18} className="text-white" />
+                <ShieldAlert size={18} className="text-white" />
               </div>
               <div>
                 <h1 className="text-sm font-bold tracking-tight text-gray-900 uppercase">Core Workspace</h1>
@@ -86,25 +114,25 @@ export default function AdminNavbar({ currentView, setViewAction }: AdminNavbarP
               </div>
             </div>
 
-            {/* Desktop explicit view close handler button option for mobile drawer display boundaries */}
             <button
               type="button"
               onClick={() => setIsOpen(false)}
               className="md:hidden p-1.5 text-gray-400 hover:text-gray-900 rounded-lg hover:bg-gray-50"
             >
-              <Icons.ChevronLeft size={18} />
+              <ChevronLeft size={18} />
             </button>
           </div>
 
           <nav className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-160px)]">
             {isLoading ? (
               <div className="p-4 text-xs text-gray-400 animate-pulse flex items-center gap-2">
-                <Icons.Loader2 size={12} className="animate-spin" />
+                <Loader2 size={12} className="animate-spin" />
                 <span>Syncing dynamic map...</span>
               </div>
             ) : (
               navItems.map((item: IAdminNav) => {
-                const DynamicIcon = (Icons as any)[item.iconName] || Icons.LayoutDashboard;
+                // Read from our optimized registry map smoothly
+                const DynamicIcon = IconMap[item.iconName] || LayoutDashboard;
                 const isActive = currentView === item.id;
                 
                 return (
@@ -141,7 +169,7 @@ export default function AdminNavbar({ currentView, setViewAction }: AdminNavbarP
             onClick={handleLogout} 
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50/50 transition-all duration-200"
           >
-            <Icons.LogOut size={18} />
+            <LogOut size={18} />
             <span>Exit Session</span>
           </button>
         </div>
