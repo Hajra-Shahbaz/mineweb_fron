@@ -1,8 +1,6 @@
 "use client";
 
 import React from 'react';
-import { HeroSection } from './lib/header';
-import FeaturedProjects from './lib/project';
 
 
 
