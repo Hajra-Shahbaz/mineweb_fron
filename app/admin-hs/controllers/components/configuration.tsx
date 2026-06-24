@@ -346,6 +346,7 @@ export default function ConfigurationView() {
                                 <div 
                                   ref={dragProvided.innerRef}
                                   {...dragProvided.draggableProps}
+                                  style={dragProvided.draggableProps.style as React.CSSProperties}
                                   className={`p-5 flex items-center gap-4 hover:bg-gray-50/50 transition-all duration-150 select-none bg-white ${
                                     snapshot.isDragging ? 'shadow-lg ring-1 ring-black/5 bg-gray-50/90 z-10 rounded-xl' : ''
                                   }`}
@@ -382,8 +383,6 @@ export default function ConfigurationView() {
                                             id: {item.id}
                                           </span>
                                         </div>
-                                        
-                                       
                                       </div>
                                     )}
                                     
@@ -459,6 +458,7 @@ export default function ConfigurationView() {
                               <div 
                                 ref={dragProvided.innerRef}
                                 {...dragProvided.draggableProps}
+                                style={dragProvided.draggableProps.style as React.CSSProperties}
                                 className={`p-5 flex items-center gap-4 hover:bg-gray-50/50 transition-all duration-150 select-none bg-white ${
                                   snapshot.isDragging ? 'shadow-lg ring-1 ring-black/5 bg-gray-50/90 z-10 rounded-xl' : ''
                                 }`}
