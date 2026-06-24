@@ -18,6 +18,8 @@ import SkillDashboard from './components/skill';
 import { SocialManager } from './components/social';
 import { ContactInbox } from './components/contact';
 import { SystemTodoPanel } from './components/task';
+import { useGetAllTasksQuery } from '../../../store/apis/taskApi';
+
 
 // Dynamic Lookup Dictionary Mapping IDs to Components
 const ComponentRegistry: Record<string, React.ComponentType<any>> = {
@@ -26,7 +28,7 @@ const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   project: ProjectView,
   experience: ExperienceSequencer, 
   education: EducationDashboard,
-  skill: SkillDashboard, 
+skill: SkillDashboard,
   social: SocialManager,
   contact: ContactInbox,
   task: SystemTodoPanel,
@@ -36,6 +38,13 @@ export default function ControllersPage() {
   const router = useRouter();
   const [activeView, setActiveView] = useState<string>('system');
   const [isCheckingAuth, setIsCheckingAuth] = useState<boolean>(true);
+
+  // Pull global tasks cache directly inside parent dashboard scope
+  const { data: tasks = [] } = useGetAllTasksQuery();
+
+  // Dynamic States for Navbar Badges
+  const [pendingCount, setPendingCount] = useState<number>(0);
+  const [hasUrgentTask, setHasUrgentTask] = useState<boolean>(false);
 
   // Security Guard Authorization Verification Loop
   useEffect(() => {
@@ -47,6 +56,30 @@ export default function ControllersPage() {
       setIsCheckingAuth(false);
     }
   }, [router]);
+
+  // Compute urgent statuses and count updates every 10 seconds
+  useEffect(() => {
+    const checkTaskMetrics = () => {
+      const incomplete = tasks.filter((t: any) => !t.isCompleted);
+      setPendingCount(incomplete.length);
+
+      const now = new Date().getTime();
+      const urgent = incomplete.some((task: any) => {
+        // Safe string parsing configuration matching your input components
+        const targetStr = task.endTime ? `${task.deadline} ${task.endTime}` : `${task.deadline} 23:59:59`;
+        const diff = new Date(targetStr).getTime() - now;
+        
+        // Critical 5-minute limit matching the child card components exactly
+        return diff > 0 && diff <= 5 * 60 * 1000; 
+      });
+
+      setHasUrgentTask(urgent);
+    };
+
+    checkTaskMetrics();
+    const interval = setInterval(checkTaskMetrics, 10000);
+    return () => clearInterval(interval);
+  }, [tasks]);
 
   const ActiveComponent = ComponentRegistry[activeView];
 
@@ -69,14 +102,14 @@ export default function ControllersPage() {
 
       {/* Primary Workspace Viewport Window */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Responsive Header: Stacked on mobile, side-by-side on desktop */}
+        {/* Responsive Header */}
         <header className="min-h-16 h-auto md:h-16 border-b border-gray-100 px-4 md:px-6 py-3 md:py-0 flex flex-col md:flex-row md:items-center justify-between bg-white sticky top-0 z-40 select-none gap-3 md:gap-0">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-gray-900" />
             <span className="text-sm font-semibold tracking-tight text-gray-800">Hajra Shahbaz</span>
           </div>
 
-          {/* Responsive Action Buttons: Wraps smoothly on small touchscreens */}
+          {/* Responsive Action Buttons */}
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end">
             <button 
               type="button"
@@ -92,14 +125,31 @@ export default function ControllersPage() {
               type="button"
               onClick={() => setActiveView('task')}
               title="Navigate straight to system pipeline and task milestones"
-              className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 md:px-3 md:py-1.5 rounded-lg border transition-all duration-200 ${
+              className={`relative inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 md:px-3 md:py-1.5 rounded-lg border transition-all duration-200 ${
                 activeView === 'task'
                   ? 'bg-gray-900 text-white border-gray-900 shadow-sm'
                   : 'bg-white text-gray-600 border-gray-100 hover:border-gray-300 hover:text-gray-900'
-              }`}
+              } ${hasUrgentTask && activeView !== 'task' ? 'border-red-200 bg-red-50/40 text-red-600 hover:bg-red-50/60' : ''}`}
             >
               <CheckSquare size={12} />
               <span>Task View</span>
+              
+              {/* Dynamic Pending Count Badge */}
+              {pendingCount > 0 && (
+                <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full transition-colors ${
+                  activeView === 'task' ? 'bg-white text-gray-900' : 'bg-gray-100 text-gray-700'
+                }`}>
+                  {pendingCount}
+                </span>
+              )}
+
+              {/* Real-time 5-Minute Warning Urgent Red Dot Indicator */}
+              {hasUrgentTask && (
+                <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+              )}
             </button>
 
             <Link 

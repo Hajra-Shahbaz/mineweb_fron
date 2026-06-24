@@ -9,13 +9,15 @@ export interface IProfilePicture {
 export interface IUserProfile {
   _id?: string;
   name: string;
-  email: string;          // 🌟 Added email
-  phoneNumber?: string;   // 🌟 Added optional phone number
+  email: string;
+  phoneNumber?: string;
   title: string;
   aboutText: string;
   subText?: string;
   profilePictures: IProfilePicture[];
   resumeUrl?: string;
+  address?: string;     // 🌟 Added address
+  mainColor?: string;   // 🌟 Added mainColor
   createdAt?: string;
   updatedAt?: string;
 }
@@ -23,11 +25,13 @@ export interface IUserProfile {
 // Request payload interface for the initial text POST block
 export interface ICreateProfileInput {
   name: string;
-  email: string;          // 🌟 Added email (Required for initial setup)
-  phoneNumber?: string;   // 🌟 Added optional phone number
+  email: string;
+  phoneNumber?: string;
   title: string;
   aboutText: string;
   subText?: string;
+  address?: string;     // 🌟 Added address
+  mainColor?: string;   // 🌟 Added mainColor
 }
 
 export const userApi = apiSlice.injectEndpoints({

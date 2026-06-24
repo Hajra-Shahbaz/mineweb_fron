@@ -7,7 +7,11 @@ export interface ITask {
   desc?: string;
   currentDate: string;
   deadline: string;
+  startTime?: string;      // Optional field for initial milestones
+  endTime?: string;        // Optional field for final milestones
+  priority: 'low' | 'medium' | 'high';
   isCompleted: boolean;
+  timeLeft: string;        // Received dynamically via Mongoose virtuals
   createdAt: string;
   updatedAt: string;
 }
@@ -18,7 +22,6 @@ export const taskApi = apiSlice.injectEndpoints({
     
     // 1. Fetch all task milestone entries
     // Targets: '/api/tasks'
-  // 1. Fetch all task milestone entries
     // Generic parameters changed: <ITask[], void> instead of the backend object literal wrapper layout
     getAllTasks: builder.query<ITask[], void>({
       query: () => '/tasks',
@@ -36,7 +39,7 @@ export const taskApi = apiSlice.injectEndpoints({
       invalidatesTags: ['Task'],
     }),
 
-    // 3. Edit task variables dynamically (e.g., toggling completion status)
+    // 3. Edit task variables dynamically (e.g., toggling completion status or altering priority)
     editTask: builder.mutation<{ success: boolean; data: ITask }, { id: string; data: Partial<ITask> }>({
       query: ({ id, data }) => ({
         url: `/tasks/${id}`,

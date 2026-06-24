@@ -5,6 +5,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://apimw.hasoftz.com/ap
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({ baseUrl: API_URL }),
-  tagTypes: ['Project', 'User', 'Nav', 'Experience', 'Education', 'Skill', 'Social', 'Contact', 'Task'], // Helps RTK Query auto-refresh when things change
+  tagTypes: ['Project', 'User', 'Nav', 'Experience', 'Education', 'Skill', 'Social', 'Contact', 'Task', 'Category'], // Helps RTK Query auto-refresh when things change
   endpoints: () => ({}), // We keep this empty here and inject endpoints from other files!
 });

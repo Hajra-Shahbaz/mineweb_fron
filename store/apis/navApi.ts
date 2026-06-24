@@ -18,6 +18,9 @@ export interface IUserNav {
   label: string;     // Text display label
   iconName: string;  // Lucide React icon string representation
   isVisible: boolean; // Public portfolio layout toggle
+  children?: IUserNav[]; // Nested navigation items
+  route?: string;    // Optional route for page navigation (e.g., 'skill/page')
+  isPage?: boolean;  // Flag to identify if this is a page navigation item
 }
 
 // Common response wrapper matching Express controller structures
@@ -41,6 +44,8 @@ export interface ICreateUserNavInput {
   label: string;
   iconName: string;
   isVisible: boolean;
+  route?: string;
+  isPage?: boolean;
 }
 
 // Payloads for editing items (Allows optional updates, including resetting the target id)
@@ -56,6 +61,8 @@ export interface IEditUserNavInput {
   label?: string;
   iconName?: string;
   isVisible?: boolean;
+  route?: string;
+  isPage?: boolean;
 }
 
 // ==========================================
@@ -121,9 +128,26 @@ export const navApi = apiSlice.injectEndpoints({
     // USER / PORTFOLIO NAVIGATION ENDPOINTS
     // ------------------------------------------
 
-    // 6. GET: Fetch user nav items -> /api/nav/user or /api/nav/user?visible=true
-    getUserNav: builder.query<ApiResponse<IUserNav[]>, { visibleOnly?: boolean } | void>({
-      query: (params) => `/nav/user${params?.visibleOnly ? '?visible=true' : ''}`,
+    // 6. GET: Fetch user nav items -> /api/nav/user or /api/nav/user?visible=true or /api/nav/user?pages=true
+    getUserNav: builder.query<ApiResponse<IUserNav[]>, { visibleOnly?: boolean; pagesOnly?: boolean } | void>({
+      query: (params) => {
+        let url = '/nav/user';
+        const queryParams = new URLSearchParams();
+        
+        if (params?.visibleOnly) {
+          queryParams.append('visible', 'true');
+        }
+        if (params?.pagesOnly) {
+          queryParams.append('pages', 'true');
+        }
+        
+        const queryString = queryParams.toString();
+        if (queryString) {
+          url += `?${queryString}`;
+        }
+        
+        return url;
+      },
       providesTags: ['Nav'],
     }),
 
@@ -166,6 +190,73 @@ export const navApi = apiSlice.injectEndpoints({
       invalidatesTags: ['Nav'],
     }),
 
+    // ------------------------------------------
+    // PAGE NAVIGATION ENDPOINTS (NEW)
+    // ------------------------------------------
+
+    // 11. GET: Fetch all page navigation items -> /api/nav/pages
+    getPageNavItems: builder.query<ApiResponse<IUserNav[]>, void>({
+      query: () => '/nav/pages',
+      providesTags: ['Nav'],
+    }),
+
+    // 12. GET: Fetch page navigation item by route -> /api/nav/pages/route/:route
+    getPageNavItemByRoute: builder.query<ApiResponse<IUserNav>, string>({
+      query: (route) => `/nav/pages/route/${route}`,
+      providesTags: ['Nav'],
+    }),
+
+    // 13. POST: Create a new page navigation item -> /api/nav/pages
+    createPageNavItem: builder.mutation<ApiResponse<IUserNav[]>, ICreateUserNavInput>({
+      query: (navData) => ({
+        url: '/nav/pages',
+        method: 'POST',
+        body: { ...navData, isPage: true },
+      }),
+      invalidatesTags: ['Nav'],
+    }),
+
+    // 14. PUT: Edit an existing page navigation item -> /api/nav/pages/:targetId
+    editPageNavItem: builder.mutation<ApiResponse<IUserNav>, { targetId: string; body: IEditUserNavInput }>({
+      query: ({ targetId, body }) => ({
+        url: `/nav/pages/${targetId}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['Nav'],
+    }),
+
+    // 15. DELETE: Remove a page navigation item -> /api/nav/pages/:id
+    deletePageNavItem: builder.mutation<ApiResponse<null>, string>({
+      query: (id) => ({
+        url: `/nav/pages/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Nav'],
+    }),
+
+    // 16. GET: Fetch children of a page navigation item -> /api/nav/pages/:parentId/children
+    getPageNavChildren: builder.query<ApiResponse<IUserNav[]>, string>({
+      query: (parentId) => `/nav/pages/${parentId}/children`,
+      providesTags: ['Nav'],
+    }),
+
+    // ------------------------------------------
+    // COMPOSITE NAVIGATION ENDPOINTS (NEW)
+    // ------------------------------------------
+
+    // 17. GET: Fetch full navigation structure -> /api/nav/full
+    getFullNavigation: builder.query<ApiResponse<{ adminNav: IAdminNav[]; userNav: IUserNav[]; pageNav: IUserNav[] }>, void>({
+      query: () => '/nav/full',
+      providesTags: ['Nav'],
+    }),
+
+    // 18. GET: Fetch organized navigation structure -> /api/nav/structure
+    getNavigationStructure: builder.query<ApiResponse<{ admin: IAdminNav[]; user: IUserNav[]; pages: IUserNav[] }>, void>({
+      query: () => '/nav/structure',
+      providesTags: ['Nav'],
+    }),
+
   }),
 });
 
@@ -187,4 +278,16 @@ export const {
   useEditUserNavItemMutation,
   useDeleteUserNavItemMutation,
   useReorderUserNavMutation,
+
+  // Page hooks (NEW)
+  useGetPageNavItemsQuery,
+  useGetPageNavItemByRouteQuery,
+  useCreatePageNavItemMutation,
+  useEditPageNavItemMutation,
+  useDeletePageNavItemMutation,
+  useGetPageNavChildrenQuery,
+
+  // Composite hooks (NEW)
+  useGetFullNavigationQuery,
+  useGetNavigationStructureQuery,
 } = navApi;

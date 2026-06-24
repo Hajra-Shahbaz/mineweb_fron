@@ -1,0 +1,99 @@
+[
+  {
+    "category": "Backend",
+    "image1": "",
+    "image2": "",
+    "order": 1,
+    "skills": [
+      { "skill": "Express.js", "order": 0 },
+      { "skill": "Node.js", "order": 1 },
+      { "skill": "JWT", "order": 21 },
+      { "skill": "Mongoose", "order": 22 },
+      { "skill": "REST APIs", "order": 27 },
+      { "skill": "Socket.io", "order": 28 }
+    ],
+    "createdAt": { "$date": "2026-06-21T15:18:14.000Z" },
+    "updatedAt": { "$date": "2026-06-21T15:18:14.000Z" },
+    "__v": 0
+  },
+  {
+    "category": "Database",
+    "image1": "",
+    "image2": "",
+    "order": 2,
+    "skills": [
+      { "skill": "MongoDB", "order": 8 },
+      { "skill": "Firebase", "order": 9 },
+      { "skill": "PostgreSQL", "order": 10 }
+    ],
+    "createdAt": { "$date": "2026-06-21T15:18:14.000Z" },
+    "updatedAt": { "$date": "2026-06-21T15:18:14.000Z" },
+    "__v": 0
+  },
+  {
+    "category": "DevOps",
+    "image1": "",
+    "image2": "",
+    "order": 3,
+    "skills": [
+      { "skill": "AWS", "order": 11 },
+      { "skill": "EC2", "order": 12 },
+      { "skill": "S3", "order": 13 },
+      { "skill": "Nginx", "order": 19 },
+      { "skill": "Vercel", "order": 20 },
+      { "skill": "Github Actions", "order": 29 }
+    ],
+    "createdAt": { "$date": "2026-06-21T15:18:14.000Z" },
+    "updatedAt": { "$date": "2026-06-21T15:18:14.000Z" },
+    "__v": 0
+  },
+  {
+    "category": "Frontend",
+    "image1": "",
+    "image2": "",
+    "order": 4,
+    "skills": [
+      { "skill": "Next.js", "order": 7 },
+      { "skill": "Tailwind CSS", "order": 15 },
+      { "skill": "Shadcn/ui", "order": 16 },
+      { "skill": "React", "order": 23 },
+      { "skill": "Redux Toolkit", "order": 24 },
+      { "skill": "Framer Motion", "order": 25 },
+      { "skill": "Lucide React", "order": 26 },
+      { "skill": "TSX", "order": 30 }
+    ],
+    "createdAt": { "$date": "2026-06-21T15:18:14.000Z" },
+    "updatedAt": { "$date": "2026-06-21T15:18:14.000Z" },
+    "__v": 0
+  },
+  {
+    "category": "Language",
+    "image1": "",
+    "image2": "",
+    "order": 5,
+    "skills": [
+      { "skill": "JavaScript", "order": 2 },
+      { "skill": "TypeScript", "order": 3 },
+      { "skill": "C", "order": 4 },
+      { "skill": "C#", "order": 5 },
+      { "skill": "C++", "order": 6 }
+    ],
+    "createdAt": { "$date": "2026-06-21T15:18:14.000Z" },
+    "updatedAt": { "$date": "2026-06-21T15:18:14.000Z" },
+    "__v": 0
+  },
+  {
+    "category": "Tools",
+    "image1": "",
+    "image2": "",
+    "order": 6,
+    "skills": [
+      { "skill": "Github", "order": 14 },
+      { "skill": "Postman", "order": 17 },
+      { "skill": "Git", "order": 18 }
+    ],
+    "createdAt": { "$date": "2026-06-21T15:18:14.000Z" },
+    "updatedAt": { "$date": "2026-06-21T15:18:14.000Z" },
+    "__v": 0
+  }
+]

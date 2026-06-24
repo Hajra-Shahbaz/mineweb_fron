@@ -2,46 +2,28 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useGetAdminNavQuery, IAdminNav } from '@/store/apis/navApi';
-
-// Explicit individual imports tell the compiler exactly what to bundle!
 import { 
-  ShieldAlert, 
-  Menu, 
-  X, 
-  ChevronLeft, 
-  LayoutDashboard, 
-  LogOut,
-  User,        // Add any specific icons you use on your backend navigation fields here
-  FolderKanban,
-  GraduationCap,
-  Briefcase,
-  Wrench,
-  Share2,
-  Mail,
-  CheckSquare,
-  Settings,
-  Loader2
-} from 'lucide-react';
+  useGetAdminNavQuery, 
+  useGetPageNavItemsQuery,
+  useGetFullNavigationQuery,
+  useGetNavigationStructureQuery,
+  IAdminNav,
+  IUserNav 
+} from '@/store/apis/navApi';
 
-// Create a local map linking strings to your actual imported icon modules
-const IconMap: Record<string, React.ComponentType<any>> = {
-  ShieldAlert,
-  Menu,
-  X,
-  ChevronLeft,
-  LayoutDashboard,
-  LogOut,
-  User,
-  FolderKanban,
-  GraduationCap,
-  Briefcase,
-  Wrench,
-  Share2,
-  Mail,
-  CheckSquare,
-  Settings,
-  Loader2
+import * as LucideIcons from 'lucide-react';
+import * as FontAwesomeIcons from 'react-icons/fa';
+
+const LucideIconMap = LucideIcons as unknown as Record<string, React.ComponentType<any>>;
+const FontAwesomeIconMap: Record<string, React.ComponentType<any>> = FontAwesomeIcons;
+
+const getIconComponent = (iconName: string) => {
+  if (iconName.startsWith('fa')) {
+    const icon = FontAwesomeIconMap[iconName] || FontAwesomeIconMap[iconName.charAt(0).toUpperCase() + iconName.slice(1)];
+    if (icon) return icon;
+  }
+  let lucideIcon = LucideIconMap[iconName] || LucideIconMap[iconName.charAt(0).toUpperCase() + iconName.slice(1)];
+  return lucideIcon || LucideIcons.LayoutDashboard;
 };
 
 interface AdminNavbarProps {
@@ -52,125 +34,103 @@ interface AdminNavbarProps {
 export default function AdminNavbar({ currentView, setViewAction }: AdminNavbarProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { data: response, isLoading } = useGetAdminNavQuery();
-  const navItems = response?.data || [];
+  
+  const { data: adminResponse, isLoading: adminLoading } = useGetAdminNavQuery();
+  const { data: pageResponse, isLoading: pageLoading } = useGetPageNavItemsQuery();
+  const { data: fullNavResponse, isLoading: fullNavLoading } = useGetFullNavigationQuery();
+  const { data: structureResponse, isLoading: structureLoading } = useGetNavigationStructureQuery();
+  
+  const navItems = adminResponse?.data || [];
+  const pageItems = pageResponse?.data || [];
+  const isLoading = adminLoading || pageLoading || fullNavLoading || structureLoading;
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
     router.push('/admin-hs');
   };
 
-  const handleNavigation = (viewId: string) => {
-    setViewAction(viewId);
-    setIsOpen(false);
-  };
-
   return (
     <>
-      {/* MOBILE TOP UTILITY CONTROLLER LAYER */}
-      <div className="md:hidden w-full bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-50 select-none">
+      {/* MOBILE HEADER */}
+      <div className="md:hidden w-full bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-lg bg-black flex items-center justify-center">
-            <ShieldAlert size={14} className="text-white" />
+          <div className="h-8 w-8 rounded-lg bg-black flex items-center justify-center shadow-sm">
+            <LucideIcons.ShieldAlert size={16} className="text-white" />
           </div>
-          <div>
-            <h1 className="text-xs font-bold tracking-tight text-gray-900 uppercase">Core Workspace</h1>
-          </div>
+          <span className="font-bold text-gray-900 tracking-tight">Core</span>
         </div>
-
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-100"
-        >
-          {isOpen ? <X size={18} /> : <Menu size={18} />}
+        <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-black hover:bg-gray-100 rounded-md transition-colors">
+          {isOpen ? <LucideIcons.X size={20} /> : <LucideIcons.Menu size={20} />}
         </button>
       </div>
 
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-xs z-40 md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      {/* OVERLAY */}
+      {isOpen && <div className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-40 md:hidden" onClick={() => setIsOpen(false)} />}
 
-      {/* PRIMARY SIDEBAR PRESENTATION VIEWPORT */}
-      <aside 
-        className={`
-          fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-100 flex flex-col justify-between h-screen font-sans select-none z-50 transition-transform duration-300 ease-in-out
-          md:sticky md:translate-x-0
-          ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-        `}
-      >
-        <div>
-          <div className="p-6 border-b border-gray-50 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-black flex items-center justify-center">
-                <ShieldAlert size={18} className="text-white" />
-              </div>
-              <div>
-                <h1 className="text-sm font-bold tracking-tight text-gray-900 uppercase">Core Workspace</h1>
-                <p className="text-[10px] text-gray-400 font-medium tracking-wider uppercase">Administrative Frame</p>
-              </div>
+      {/* SIDEBAR */}
+      <aside className={`fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-200 flex flex-col h-screen z-50 transition-transform duration-300 md:sticky md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        
+        {/* BRANDING */}
+        <div className="h-16 flex items-center px-6 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-lg bg-gray-900 flex items-center justify-center">
+              <LucideIcons.ShieldAlert size={18} className="text-white" />
             </div>
-
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="md:hidden p-1.5 text-gray-400 hover:text-gray-900 rounded-lg hover:bg-gray-50"
-            >
-              <ChevronLeft size={18} />
-            </button>
+            <div>
+              <h1 className="text-sm font-bold text-gray-900 tracking-tight">CORE WORKSPACE</h1>
+              <p className="text-[10px] text-gray-400 font-semibold tracking-widest uppercase">Admin Panel</p>
+            </div>
           </div>
-
-          <nav className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-160px)]">
-            {isLoading ? (
-              <div className="p-4 text-xs text-gray-400 animate-pulse flex items-center gap-2">
-                <Loader2 size={12} className="animate-spin" />
-                <span>Syncing dynamic map...</span>
-              </div>
-            ) : (
-              navItems.map((item: IAdminNav) => {
-                // Read from our optimized registry map smoothly
-                const DynamicIcon = IconMap[item.iconName] || LayoutDashboard;
-                const isActive = currentView === item.id;
-                
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleNavigation(item.id)}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      isActive 
-                        ? 'bg-gray-900 text-white shadow-sm' 
-                        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <DynamicIcon size={18} className={isActive ? 'text-white' : 'text-gray-400'} />
-                      <span>{item.label}</span>
-                    </div>
-                    
-                    {!item.isWorking && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-100 uppercase font-bold tracking-wider scale-95">
-                        Under Dev
-                      </span>
-                    )}
-                  </button>
-                );
-              })
-            )}
-          </nav>
         </div>
 
-        <div className="p-4 border-t border-gray-50 bg-white">
-          <button 
-            type="button"
-            onClick={handleLogout} 
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50/50 transition-all duration-200"
-          >
-            <LogOut size={18} />
-            <span>Exit Session</span>
+        {/* NAVIGATION */}
+        <nav className="flex-1 overflow-y-auto p-4 space-y-6">
+          {isLoading ? (
+             <div className="flex items-center gap-2 text-gray-400 text-xs px-4"><LucideIcons.Loader2 className="animate-spin" size={14} /> Loading...</div>
+          ) : (
+            <>
+              {/* Admin Section */}
+              <div className="space-y-1">
+                {navItems.map((item: IAdminNav) => {
+                  const Icon = getIconComponent(item.iconName);
+                  const isActive = currentView === item.id;
+                  return (
+                    <button key={item.id} onClick={() => { setViewAction(item.id); setIsOpen(false); }} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive ? 'bg-indigo-50 text-black shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}>
+                      <div className="flex items-center gap-3">
+                        <Icon size={18} className={isActive ? 'text-black' : 'text-gray-400'} />
+                        {item.label}
+                      </div>
+                      {!item.isWorking && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Pages Section */}
+              {pageItems.length > 0 && (
+                <div className="space-y-1">
+                  <p className="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Pages</p>
+                  {pageItems.map((item: IUserNav) => {
+                    const Icon = getIconComponent(item.iconName);
+                    const isActive = currentView === item.id;
+                    return (
+                      <button key={item.id} onClick={() => { item.isPage && item.route ? router.push(`/${item.route}`) : setViewAction(item.id); setIsOpen(false); }} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50'}`}>
+                        <Icon size={18} />
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+        </nav>
+
+        {/* LOGOUT */}
+        <div className="p-4 border-t border-gray-100">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors">
+            <LucideIcons.LogOut size={18} />
+            Sign Out
           </button>
         </div>
       </aside>
