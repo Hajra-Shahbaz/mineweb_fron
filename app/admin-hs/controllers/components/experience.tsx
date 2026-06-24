@@ -235,6 +235,7 @@ export default function ExperienceDashboard() {
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
+                              style={provided.draggableProps.style as React.CSSProperties}
                               className={`flex flex-col justify-between p-3.5 bg-white border rounded-xl transition-all h-[155px] ${
                                 snapshot.isDragging 
                                   ? 'border-black shadow-md scale-[1.01] bg-gray-50/40' 

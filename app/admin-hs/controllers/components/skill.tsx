@@ -477,6 +477,7 @@ export default function SkillDashboard() {
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
+                                  style={provided.draggableProps.style as React.CSSProperties}
                                   className={`bg-white border rounded-lg transition-all ${
                                     snapshot.isDragging ? 'border-blue-400 shadow-lg ring-2 ring-blue-400/20' : 'border-gray-200 hover:border-gray-300'
                                   }`}
@@ -536,6 +537,7 @@ export default function SkillDashboard() {
                                                       <div
                                                         ref={provided.innerRef}
                                                         {...provided.draggableProps}
+                                                        style={provided.draggableProps.style as React.CSSProperties}
                                                         className={`flex items-center gap-3 px-3 py-2 bg-white border rounded-lg transition-all ${
                                                           snapshot.isDragging ? 'border-blue-400 shadow-md' : 'border-gray-100 hover:border-gray-200'
                                                         }`}
